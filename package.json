@@ -1,0 +1,22 @@
+{
+  "name": "ractive-saving-stuff",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Playing around getting some stuff to work",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "wzrd app.js -- -t ractive-browserify"
+  },
+  "author": "TehShrike",
+  "license": "WTFPL",
+  "dependencies": {
+    "ractive": "^0.7.3"
+  },
+  "devDependencies": {
+    "browserify": "^10.2.1",
+    "ractive-browserify": "^0.7.1",
+    "tape": "^4.0.0",
+    "wzrd": "^1.3.0"
+  }
+}
