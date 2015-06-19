@@ -11,6 +11,9 @@
   "author": "TehShrike",
   "license": "WTFPL",
   "dependencies": {
+    "baconjs": "^0.7.65",
+    "extend": "^2.0.1",
+    "mannish": "^1.0.4",
     "ractive": "^0.7.3"
   },
   "devDependencies": {
