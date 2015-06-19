@@ -2,11 +2,13 @@ var extend = require('extend')
 var makeIgnoreNextObject = require('./ignore-changes')
 var Bacon = require('baconjs')
 
-module.exports = function makeCollectingStream(observable, appContext, initialState) {
-	var mediator = appContext('inside')
+module.exports = function makeCollectingStream(options) {
+	var observable = options.observable
+	var mediator = options.appContext('inside')
 	var ignoreNext = makeIgnoreNextObject()
+	var mediatorSaveKey = options.mediatorKey
 
-	ignoreNext(initialState)
+	ignoreNext(options.initialState)
 
 	var upcomingChanges = {}
 	var inFlight = false
@@ -22,7 +24,7 @@ module.exports = function makeCollectingStream(observable, appContext, initialSt
 		upcomingChanges = {}
 		inFlight = true
 
-		mediator.publish('save', theseChanges, function(err, changes) {
+		mediator.publish(mediatorSaveKey, theseChanges, function(err, changes) {
 			inFlight = false
 			if (err) {
 				sink(new Bacon.Error(err))

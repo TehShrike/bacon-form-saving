@@ -3,6 +3,7 @@ var Ractive = require('ractive')
 var Bacon = require('baconjs')
 var mannish = require('mannish')
 var makeCollectingStream = require('./form-collecting-stream')
+var observeForm = require('./observe-form')
 
 var appContext = mannish()
 
@@ -10,6 +11,8 @@ var initialObject = {
 	thing1: 'initial value',
 	thing2: 'lol'
 }
+
+var mediatorSaveKey = 'saveIt'
 
 var indexRactive = new Ractive({
 	template: indexTemplate,
@@ -19,22 +22,9 @@ var indexRactive = new Ractive({
 	}
 })
 
-function makeObservable(ractive, keypath, property) {
-	return Bacon.fromBinder(function(sink) {
-		ractive.observe(keypath, sink)
-		ractive.on('teardown', function() {
-			sink(new Bacon.End())
-		})
-	}).filter(function(str) {
-		return !!str
-	}).map(function(str) {
-		var o = {}
-		o[property] = str
-		return o
-	})
-}
+var formObservable = observeForm(indexRactive, ['thing1', 'thing2', 'thing3', 'thing4', 'thing5'], 'theThing')
 
-appContext('outside').subscribe('save', function(changes, cb) {
+appContext('outside').subscribe(mediatorSaveKey, function(changes, cb) {
 	console.log('server got', changes)
 	setTimeout(function() {
 		var newData = {}
@@ -45,15 +35,12 @@ appContext('outside').subscribe('save', function(changes, cb) {
 	}, 3000)
 })
 
-var formObservable = Bacon.mergeAll([
-	makeObservable(indexRactive, 'theThing.thing1', 'thing1'),
-	makeObservable(indexRactive, 'theThing.thing2', 'thing2'),
-	makeObservable(indexRactive, 'theThing.thing3', 'thing3'),
-	makeObservable(indexRactive, 'theThing.thing4', 'thing4'),
-	makeObservable(indexRactive, 'theThing.thing5', 'thing5')
-])
-
-var changeStream = makeCollectingStream(formObservable, appContext, initialObject)
+var changeStream = makeCollectingStream({
+	observable: formObservable,
+	mediatorKey: mediatorSaveKey,
+	appContext: appContext,
+	initialState: initialObject
+})
 
 changeStream.subscribe(function(event) {
 	var changeReportedByServer = event.value()
