@@ -6,12 +6,14 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "wzrd app.js -- -t ractive-browserify"
+    "dev": "wzrd app.js -- -t brfs"
   },
   "author": "TehShrike",
   "license": "WTFPL",
   "dependencies": {
     "baconjs": "^0.7.65",
+    "brfs": "1.4.1",
+    "combine-arrays": "1.0.2",
     "extend": "^2.0.1",
     "mannish": "^1.0.4",
     "ractive": "^0.7.3"

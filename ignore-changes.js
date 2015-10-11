@@ -1,15 +1,27 @@
 var extend = require('extend')
+var combine = require('combine-arrays')
 
 module.exports = function makeIgnoreNextObject() {
 	var ignoreNext = {}
 
 	function takeIgnoresIntoAccount(object) {
-		var outputCopy = {}
+		var keys = Object.keys(object)
 
-		Object.keys(object).forEach(function(key) {
-			if (ignoreNext[key] !== object[key]) {
-				outputCopy[key] = object[key]
-			}
+		var values = keys.map(function(key) {
+			return object[key]
+		})
+
+		var outputCopy = combine({
+			key: keys,
+			value: values
+		}).filter(function(pair) {
+			return ignoreNext[pair.key] !== pair.value
+		}).reduce(function(outputCopy, pair) {
+			outputCopy[pair.key] = pair.value
+			return outputCopy
+		}, {})
+
+		keys.forEach(function(key) {
 			delete ignoreNext[key]
 		})
 
