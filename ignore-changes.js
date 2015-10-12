@@ -1,4 +1,4 @@
-var extend = require('extend')
+var extend = require('xtend/mutable')
 var combine = require('combine-arrays')
 
 module.exports = function makeIgnoreNextObject() {
