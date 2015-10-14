@@ -2,13 +2,15 @@ var extend = require('xtend/mutable')
 var makeIgnoreNextObject = require('./ignore-changes')
 var Bacon = require('baconjs')
 
-module.exports = function makeCollectingStream(changeStream, initialState, saveFn) {
+module.exports = function makeCollectingStream(changeStream, initialState, idName, saveFn) {
 	var ignoreNext = makeIgnoreNextObject()
-
+	initialState = initialState || {}
 	ignoreNext(initialState)
 
 	var upcomingChanges = {}
 	var inFlight = false
+	var version = initialState.version || 0
+	var primaryKey = initialState[idName]
 
 	function sendChangesToServerIfAppropriate(sink) {
 		if (Object.keys(upcomingChanges).length > 0 && !inFlight) {
@@ -21,15 +23,24 @@ module.exports = function makeCollectingStream(changeStream, initialState, saveF
 		upcomingChanges = {}
 		inFlight = true
 
-		saveFn(theseChanges, function(err, changes) {
+		theseChanges.version = version
+		theseChanges[idName] = primaryKey
+
+		saveFn(theseChanges, function(err, newVersion) {
 			inFlight = false
 			if (err) {
 				sink(new Bacon.Error(err))
 				upcomingChanges = {}
-			} else {
-				ignoreNext(changes)
-				sink(changes)
+			}
+
+			if (!err || err.outOfDate) {
+				ignoreNext(newVersion)
+				sink(newVersion)
+				version = newVersion.version
+				primaryKey = newVersion[idName]
 				sendChangesToServerIfAppropriate(sink)
+			} else if (err) {
+				sink(new Bacon.End(err))
 			}
 		})
 	}

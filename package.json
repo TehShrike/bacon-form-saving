@@ -1,24 +1,25 @@
 {
-  "name": "ractive-saving-stuff",
-  "private": true,
-  "version": "1.0.0",
-  "description": "Playing around getting some stuff to work",
-  "main": "index.js",
+  "name": "bacon-form-saving",
+  "version": "1.1.0",
+  "description": "Streaming an object from a web form to a server, and back again",
+  "main": "form-collecting-stream.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "echo \"Error: no test specified :-x\" && exit 0",
     "dev": "wzrd app.js -- -t brfs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TehShrike/bacon-form-saving.git"
   },
   "author": "TehShrike",
   "license": "WTFPL",
   "dependencies": {
     "baconjs": "^0.7.65",
-    "brfs": "1.4.1",
-    "combine-arrays": "1.0.2",
-    "mannish": "^1.0.4",
-    "ractive": "^0.7.3",
     "xtend": "4.0.0"
   },
   "devDependencies": {
+    "ractive": "^0.7.3",
+    "brfs": "1.4.1",
     "browserify": "^10.2.1",
     "ractive-browserify": "^0.7.1",
     "tape": "^4.0.0",

@@ -1,14 +1,17 @@
-A playground for building tools that let me
+For a single row in a database somewhere, and a single web form that lets you edit that data in real time.
 
-- watch inputs in [Ractive](http://www.ractivejs.org/) templates
-- turn them into [Bacon](baconjs.github.io) streams
-- send them to a server
-- update the Ractive element to reflect the "saving" state
-- on response from the server, update the inputs with the server-validated data
-- update the Ractive element to reflect the "saved" state
-- handle saves that fail because of [optimistic concurrency control](https://en.wikipedia.org/wiki/Optimistic_concurrency_control) and reflect the updated state in the Ractive element
+Create a BaconJS stream of objects whose properties are the column identifiers and whose values are the new values entered by the user: `{ name: 'Josh' }`
 
-To see the current state of things:
+Call the function exported by this module, passing in
+
+1. that stream
+2. an object containing the initial/current state of the object in the database
+3. the name of the primary key column
+3. a function that takes an object and a callback function, that saves the object and calls back with either an error, and if possible, the new state of the object in the database.
+
+It's pretty opinionated.  It handles populating a `version` value with whatever the latest `version` was on the object received from the server, and a primary key column populated from the initial state, or the latest object received from the server.
+
+To check out the play/testing ground:
 
 ```sh
 git clone git@github.com:TehShrike/ractive-saving-stuff.git
