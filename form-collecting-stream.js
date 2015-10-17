@@ -1,6 +1,7 @@
 var extend = require('xtend/mutable')
 var makeIgnoreNextObject = require('./ignore-changes')
 var Bacon = require('baconjs')
+var EventEmitter = require('events').EventEmitter
 
 module.exports = function makeCollectingStream(changeStream, initialState, idName, saveFn) {
 	var ignoreNext = makeIgnoreNextObject()
@@ -8,9 +9,10 @@ module.exports = function makeCollectingStream(changeStream, initialState, idNam
 	ignoreNext(initialState)
 
 	var upcomingChanges = {}
-	var inFlight = false
+	var inFlight = null
 	var version = initialState.version || 0
 	var primaryKey = initialState[idName]
+	var savedEmitter = new EventEmitter()
 
 	function sendChangesToServerIfAppropriate(sink) {
 		if (Object.keys(upcomingChanges).length > 0 && !inFlight) {
@@ -21,13 +23,15 @@ module.exports = function makeCollectingStream(changeStream, initialState, idNam
 	function sendChangesToServer(sink) {
 		var theseChanges = upcomingChanges
 		upcomingChanges = {}
-		inFlight = true
+		inFlight = Object.keys(theseChanges)
 
 		theseChanges.version = version
 		theseChanges[idName] = primaryKey
 
 		saveFn(theseChanges, function(err, newVersion) {
-			inFlight = false
+			var notInFlightAnyMore = inFlight
+			inFlight = null
+
 			if (err) {
 				sink(new Bacon.Error(err))
 				upcomingChanges = {}
@@ -39,13 +43,16 @@ module.exports = function makeCollectingStream(changeStream, initialState, idNam
 				version = newVersion.version
 				primaryKey = newVersion[idName]
 				sendChangesToServerIfAppropriate(sink)
+				savedEmitter.emit('properties', notInFlightAnyMore)
+
+
 			} else if (err) {
 				sink(new Bacon.End(err))
 			}
 		})
 	}
 
-	return Bacon.fromBinder(function(sink) {
+	var newVersionsFromServer = Bacon.fromBinder(function(sink) {
 		return changeStream.onValue(function subscriber(change) {
 			var changes = ignoreNext.takeIgnoresIntoAccount(change)
 
@@ -54,4 +61,11 @@ module.exports = function makeCollectingStream(changeStream, initialState, idNam
 			sendChangesToServerIfAppropriate(sink)
 		})
 	})
+
+	var propertiesSavedAndGotBackFromServer = Bacon.fromEvent(savedEmitter, 'properties')
+
+	return {
+		newVersionsFromServer: newVersionsFromServer,
+		propertiesSavedAndGotBackFromServer: propertiesSavedAndGotBackFromServer
+	}
 }
