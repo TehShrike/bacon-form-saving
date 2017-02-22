@@ -14,7 +14,7 @@
   "author": "TehShrike",
   "license": "WTFPL",
   "dependencies": {
-    "baconjs": "^0.7.65",
+    "baconjs": "0.7.65",
     "combine-arrays": "^1.0.2",
     "xtend": "4.0.0"
   },

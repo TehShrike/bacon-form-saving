@@ -15,10 +15,12 @@ var indexRactive = new Ractive({
 		theThing: initialObject
 	}
 })
-var fields = ['thing1', 'thing2', 'thing3', 'thing4', 'thing5']
+var fields = [ 'thing1', 'thing2', 'thing3', 'thing4', 'thing5' ]
 var changedFieldsStream = observeForm(indexRactive, fields, 'theThing')
 
-makeCollectingStream(changedFieldsStream, initialObject, serverApi).onValue(function(changeReportedByServer) {
+const streams = makeCollectingStream(changedFieldsStream, initialObject, 'id', serverApi)
+
+streams.newVersionsFromServer.onValue(function(changeReportedByServer) {
 	indexRactive.set(prependKeysWith('theThing.', changeReportedByServer))
 
 	var savingKeys = prependKeysWith('saving.theThing.', changeReportedByServer)
